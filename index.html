@@ -1,16 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Mutall Task Manager</title>
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
-    
-
+    <!-- link the css -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/materialize.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
+
 <body>
-    
+    <nav>
+        <div class="nav-wrapper blue">
+            <div class="container">
+                <a href="#" class="brand-logo center">Mutall Task Manager</a>
+                <ul class="right">
+                    <li>
+                        <a href="#" class="clear-btn btn blue lighten-3">clear all</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">Add Task </span>
+                <form class="col">
+                    <div class="row">
+                        <div class="input-field col s4">
+                            <input type="text" placeholder="Add Task" id="add-item">
+                            <label for="add-item">Add Task</label>
+                        </div>
+                        <div class="input-field col s4">
+                            <input type="text" placeholder="Start Date" class="datepicker">
+                            <label for="add-item">Start Date</label>
+                        </div>
+
+                        <div class="input-field col s4">
+                            <select id="user" class="select" material-select>
+                                <option value="" disabled selected>Choose a user</option>
+                                <option value="muraya">Muraya</option>
+                                <option value="raphael">Raphael</option>
+                                <option value="samuel">Samuel</option>
+                                <option value="dennis">Dennis</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <p>
+                            <label for="Ntstd">
+                                <input type="radio" name="group1" id="Ntstd" checked class="with-gap">
+                                <span>Not Started</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label for="std">
+                                <input type="radio" name="group1" id="std" class="with-gap">
+                                <span>In Progress</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label for="fshd">
+                                <input type="radio" name="group1" id="fshd" class="with-gap">
+                                <span>Finished</span>
+                            </label>
+                        </p>
+                    </div>
+                    <div class="row">
+                        <button class="add-btn btn blue darken-3"><i class="fa fa-plus"></i> Add Task</button>
+                        <button class="update-btn btn orange"><i class="fa fa-pencil-square-o"></i> Edit Task</button>
+                        <button class="delete-btn btn red"><i class="fa fa-remove"></i> Delete Task</button>
+                        <button class="back-btn btn grey pull-right"><i class="fa fa-chevron-circle-left "></i> Back</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <h3 class="center-align">Total Tasks: <span class="total-tasks">0</span></h3>
+        <ul class="collection" id="item-list">
+            <li class="collection-item" id="item-0">
+                <strong>Build website: </strong>Samuel <em>2/08/2018</em>
+                <a href="#" class="secondary-content"><i class="fa fa-pencil"></i></a>
+            </li>
+            <li class="collection-item" id="item-0">
+                <strong>Merging Databases together: </strong>Samuel <em>2/08/2018</em>
+                <a href="#" class="secondary-content"><i class="fa fa-pencil"></i></a>
+            </li>
+            <li class="collection-item" id="item-0">
+                <strong>Android Application layout interface: </strong>Samuel <em>2/08/2018</em>
+                <a href="#" class="secondary-content"><i class="fa fa-pencil"></i></a>
+            </li>
+        </ul>
+    </div>
+    <!-- link the scripts -->
+    <script src="js/jquery.js"></script>
+    <script src="js/materialize.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker();
+            $('select').formSelect();
+        });
+    let app = new App;
+    app.getAllTasks();
+    </script>
 </body>
+
 </html>
