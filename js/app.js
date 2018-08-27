@@ -2,7 +2,66 @@
  * Task manager app using the module pattern
  */
 
-//Strorage controller
+//Storage controller
+const StorageCtrl =(()=>{
+    return {
+        storeToLs:(task)=>{
+            let tasks;
+            if (localStorage.getItem('tasks')== null){
+                tasks = [];
+
+                //insert to array
+                tasks.push(task)
+
+                //insert to ls
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }else{
+                //get what is already in local strorage
+                tasks = JSON.parse(localStorage.getItem('tasks'));
+
+                //insert to array
+                tasks.push(task)
+
+                //insert to ls
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+        },
+        getFromLs:()=>{
+            let tasks;
+            if (localStorage.getItem('tasks')===null){
+                tasks = [];
+            }else{
+                tasks = JSON.parse(localStorage.getItem('tasks'))
+            }
+            return tasks;
+
+        },
+        updateTask:(updatedTask)=>{
+          let tasks = JSON.parse(localStorage.getItem('tasks'));
+          tasks.forEach((task, index)=>{
+            if(updatedTask.id == task.id){
+              tasks.splice(index, 1, updatedTask);
+            }
+          });
+
+          localStorage.setItem('tasks', JSON.stringify(tasks))
+        },
+        deleteTask:(id)=>{
+          let tasks = JSON.parse(localStorage.getItem('tasks'));
+          tasks.forEach((task, index)=>{
+            if(id == task.id){
+              tasks.splice(index, 1);
+            }
+          });
+
+          localStorage.setItem('tasks', JSON.stringify(tasks))
+          
+        },
+        clearAll:()=>{
+          localStorage.removeItem('tasks');
+        }
+    }
+})()
 
 //Task controller
 const TaskCtrl = (() => {
@@ -15,29 +74,7 @@ const TaskCtrl = (() => {
   };
 
   const data = {
-    tasks: [
-      // {
-      //     id: 0,
-      //     name: "Build Website",
-      //     date: "1/1/2012",
-      //     user: "samuel",
-      //     state: "started"
-      // },
-      // {
-      //     id: 1,
-      //     name: "Android user interface",
-      //     date: "1/2/2015",
-      //     user: "lantei",
-      //     state: "completed"
-      // },
-      // {
-      //     id: 2,
-      //     name: "Merge Databases",
-      //     date: "1/1/2019",
-      //     user: "Muraya",
-      //     state: "in progress"
-      // }
-    ],
+    tasks: StorageCtrl.getFromLs(),
     currentTask: null,
     totalTasks: 0
   };
@@ -65,7 +102,7 @@ const TaskCtrl = (() => {
     getTasks: () => {
       return data.tasks;
     },
-    addItem: (name, date, user, state) => {
+    addTask: (name, date, user, state) => {
       let ID;
       //generate an autoincrement id
       if (data.tasks.length > 0) {
@@ -103,7 +140,7 @@ const TaskCtrl = (() => {
       const index = array_ids.indexOf(id);
 
       //remove it from the data structure
-      data.tasks.splice(index);
+      data.tasks.splice(index, 1);
     },
     clearAll: () => {
       data.tasks = [];
@@ -121,6 +158,7 @@ const UiCtrl = (() => {
     updateBtn: ".update-btn",
     deleteBtn: ".delete-btn",
     backBtn: ".back-btn",
+    clearAll:".clear-btn",
     tasklist: "#task-list",
     taskListItems: "#task-list li",
     taskInput: "#add-task",
@@ -171,20 +209,20 @@ const UiCtrl = (() => {
         state: document.querySelector(UiSelectors.taskState).value
       };
     },
-    populateTasks: tasks => {
+    populateTasks: (tasks) => {
       let html = "";
 
       tasks.forEach(function(task) {
         html += `<li class="collection-item" id="item-${task.id}">
             <strong>${task.name}: </strong>${task.user} <em>${task.date}</em>
-            <a href="#" class="secondary-content"><i class="fa fa-pencil"></i></a>
+            <a href="#" class="secondary-content"><i class="edit-item fa fa-pencil"></i></a>
         </li>`;
       });
 
       document.querySelector(UiSelectors.tasklist).innerHTML = html;
     },
 
-    addTaskUi: task => {
+    addTaskUi: (task) => {
       //create the li
       const li = document.createElement("li");
 
@@ -230,13 +268,22 @@ const UiCtrl = (() => {
 
       // remove it
       task.remove();
+    },
+    clearAll:()=>{
+        let lists = document.querySelectorAll(UiSelectors.taskListItems)
+
+        lists = Array.from(lists);
+
+        lists.forEach((list)=>{
+            list.remove();
+        })
+
     }
   };
 })();
-
 //App controller
 
-const App = ((TaskCtrl, UiCtrl) => {
+const App = ((TaskCtrl, UiCtrl, Storagectrl) => {
   // load event listeners
   const loadListeners = () => {
     const UiSelectors = UiCtrl.getSelectors();
@@ -266,6 +313,7 @@ const App = ((TaskCtrl, UiCtrl) => {
     TaskCtrl.clearAll();
     UiCtrl.clearAll();
 
+    StorageCtrl.clearAll();
     UiCtrl.clearEditState();
     e.preventDefault();
   };
@@ -289,6 +337,9 @@ const App = ((TaskCtrl, UiCtrl) => {
 
     UiCtrl.updateTaskUi(updatedTask);
 
+    StorageCtrl.updateTask(updatedTask);
+
+    showTotals();
     UiCtrl.clearEditState();
 
     e.preventDefault();
@@ -300,6 +351,9 @@ const App = ((TaskCtrl, UiCtrl) => {
 
     UiCtrl.deleteTaskUi();
 
+    Storagectrl.deleteTask(taskToDelete.id);
+
+    showTotals();
     UiCtrl.clearEditState();
     e.preventDefault();
   };
@@ -335,19 +389,22 @@ const App = ((TaskCtrl, UiCtrl) => {
 
     // do some validation
     if (userInput.date != "" && userInput.task != "" && userInput.user != "") {
-      const newTask = TaskCtrl.addItem(
+      const newTask = TaskCtrl.addTask(
         userInput.task,
         userInput.date,
         userInput.user,
         userInput.state
       );
+      //add task to ls
+      Storagectrl.storeToLs(newTask);
+      
+      
       //add the item to the ui
-
-      const addTaskUi = UiCtrl.addTaskUi(newTask);
-
+      UiCtrl.addTaskUi(newTask);
       const clearInputs = UiCtrl.clearInputs();
-
       showTotals();
+    }else{
+      alert("input a task");
     }
 
     e.preventDefault();
@@ -363,6 +420,6 @@ const App = ((TaskCtrl, UiCtrl) => {
       showTotals();
     }
   };
-})(TaskCtrl, UiCtrl);
+})(TaskCtrl, UiCtrl, StorageCtrl);
 
 App.run();
