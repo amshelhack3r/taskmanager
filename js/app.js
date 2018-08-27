@@ -38,7 +38,7 @@ const TaskCtrl = (() => {
             //     state: "in progress"
             // }
         ],
-        currentItem: null,
+        currentTask: null,
         totalTasks: 0
     };
 
@@ -46,6 +46,22 @@ const TaskCtrl = (() => {
     return {
         getTotalTasks:()=>{
             return data.tasks.length
+        },
+        getTaskById:(id)=>{
+            let found;
+            data.tasks.forEach((task)=>{
+                if(task.id == id){
+                    found = task;
+                }
+
+            })
+            return found;
+        },
+        setCurrentTask:(task)=>{
+            data.currentTask =task
+        },
+        getCurrentTask:()=>{
+            return data.currentTask;
         },
         getTasks: () => {
             return data.tasks;
@@ -87,6 +103,18 @@ const UiCtrl = (() => {
     }
     // public methods
     return {
+        addCurrentToForm:()=>{
+            const currentTask = TaskCtrl.getCurrentTask();
+            document.querySelector(UiSelectors.taskInput).value = currentTask.name;
+            document.querySelector(UiSelectors.dateInput).value = currentTask.date;
+            document.querySelector(UiSelectors.userSelect).value = currentTask.user;
+            document.querySelector(UiSelectors.taskState).value = currentTask.state;
+
+            document.querySelector(UiSelectors.updateBtn).style.display = "inline";
+            document.querySelector(UiSelectors.deleteBtn).style.display = "inline";
+            document.querySelector(UiSelectors.backBtn).style.display = "inline";
+            document.querySelector(UiSelectors.addBtn).style.display = "none";
+        },
         clearEditState:()=>{
             UiCtrl.clearInputs();
             document.querySelector(UiSelectors.updateBtn).style.display = "none";
@@ -100,7 +128,7 @@ const UiCtrl = (() => {
         clearInputs:()=>{
             document.querySelector(UiSelectors.taskInput).value = "";
             document.querySelector(UiSelectors.dateInput).value = "";
-            document.querySelector(UiSelectors.userSelect).vale = "Choose a user";
+            document.querySelector(UiSelectors.userSelect).value = "Choose a user";
             document.querySelector(UiSelectors.taskState).value = "Not Started";
         },
         getSelectors: () => {
@@ -157,14 +185,47 @@ const App = ((TaskCtrl, UiCtrl) => {
 
         //add a listener when the user clicks add
         document.querySelector(UiSelectors.addBtn).addEventListener("click", addTask);
+        document.querySelector(UiSelectors.updateBtn).addEventListener("click", updateTask);
+        document.querySelector(UiSelectors.deleteBtn).addEventListener("click", deleteTask);
+        document.querySelector(UiSelectors.backBtn).addEventListener("click", goBack);
         document.querySelector(UiSelectors.tasklist).addEventListener("click", updateMode );
     }
 
-    const updateMode =(e)=>{
-        if(e.target.className = "edit-item")        
+    const goBack =(e)=>{
+        UiCtrl.clearInputs();
+        UiCtrl.clearEditState();
+         
         e.preventDefault();
     }
+    const updateTask =(e)=>{
 
+    }
+    const deleteTask =(e)=>{
+
+    }
+
+
+    const updateMode =(e)=>{
+        if(e.target.classList.contains("edit-item")){
+            // get the id of the list item
+            const list_id = e.target.parentNode.parentNode.id;
+
+            // spit the id to get the number only
+            const arr_id = list_id.split("-");
+
+            // get the list id as an integer
+            const id = parseInt(arr_id[1]);
+
+            const task = TaskCtrl.getTaskById(id)
+
+            const currentItem = TaskCtrl.setCurrentTask(task)
+
+            UiCtrl.addCurrentToForm()
+            }
+        
+        e.preventDefault();
+    
+        }        
     const showTotals = ()=>{
         const totalTasks = TaskCtrl.getTotalTasks();
         
